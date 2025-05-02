@@ -13,6 +13,8 @@ export default function Navigation() {
   <Stack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false }} />
   <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
   <Stack.Screen name="SignupScreen" component={SignupScreen} options={{ headerShown: false }} />
+  <Stack.Screen name="Home" component={HomeScreen} />
+
   <Stack.Screen name="ImamMalikProfile" component={ImamMalikProfile} options={{ title: 'Imam Malik Profile' }} />
   <Stack.Screen name="MalikChatbot" component={MalikChatbot} options={{ title: 'Ask Imam Malik' }} />
 </Stack.Navigator>

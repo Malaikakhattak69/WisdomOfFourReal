@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, Button, Image } from 'react-native'
 export default function ImamAhmadProfile({ navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../assets/imam_ahmad.png')} style={styles.image} />
+      <Image source={require('../assets/ahmadlogo.png')} style={styles.image} />
       
       <Text style={styles.name}>Imam Ahmad ibn Hanbal</Text>
 

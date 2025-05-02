@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, Button, Image } from 'react-native'
 export default function ImamShafiiProfile({ navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../assets/imam_shafii.png')} style={styles.image} />
+      <Image source={require('../assets/shafilogo.png')} style={styles.image} />
       
       <Text style={styles.name}>Imam Al-Shafi'i</Text>
 

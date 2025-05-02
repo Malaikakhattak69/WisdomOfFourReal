@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, Button, Image } from 'react-native'
 export default function ImamAbuHanifaProfile({ navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../assets/imam_abu_hanifa.png')} style={styles.image} />
+      <Image source={require('../assets/hanifalogo.png')} style={styles.image} />
       
       <Text style={styles.name}>Imam Abu Hanifa</Text>
 
