@@ -1,29 +1,48 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+import json
 import faiss
 import numpy as np
-import json
 from sentence_transformers import SentenceTransformer
 
-# Load your model and data
-model = SentenceTransformer('all-MiniLM-L6-v2')  # Or the one you used originally
-index = faiss.read_index('imam_malik_faiss.index')
-embeddings = np.load('imam_malik_embeddings.npy')
+# ✅ Create Flask app and enable CORS
+app = Flask(__name__)
+CORS(app)
+
+# ✅ Load sentence transformer model
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# ✅ Load hadith texts
 with open('imam_malik_texts_for_server.json', 'r', encoding='utf-8') as f:
     texts = json.load(f)
 
-app = Flask(__name__)
-
-@app.route('/ask', methods=['POST'])
-def ask():
-    user_input = request.json.get('question')
-    question_embedding = model.encode([user_input])
-    D, I = index.search(np.array(question_embedding), k=1)
-    response_text = texts[I[0][0]]
-    return jsonify({'answer': response_text})
+# ✅ Load FAISS index and embeddings
+embeddings = np.load('imam_malik_embeddings.npy')
+index = faiss.read_index('imam_malik_faiss.index')
 
 @app.route('/')
 def home():
-    return 'Imam Malik Chatbot Backend Running!'
+    return "Imam Malik Chatbot API is running."
 
+@app.route('/ask', methods=['POST'])
+def ask():
+    data = request.get_json()
+    query = data.get('query')
+
+    if not query:
+        return jsonify({'error': 'Query is missing'}), 400
+
+    # Convert query to embedding
+    query_embedding = model.encode([query])
+
+    # Search using FAISS
+    D, I = index.search(np.array(query_embedding).astype('float32'), k=1)
+
+    best_index = I[0][0]
+    best_text = texts[best_index]['text']
+
+    return jsonify({'text': best_text})
+
+# ✅ Correct _name_ check
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,44 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
-  FlatList, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard
 } from 'react-native';
 
 export default function MalikChatbot() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { id: '0', text: '🤖 Salaam! How can I assist you with Imam Malik’s teachings today?', sender: 'bot' }
+    {
+      id: '0',
+      text: '🤖 Salaam! How can I assist you with Imam Malik’s teachings today?',
+      sender: 'bot'
+    }
   ]);
+
+  const flatListRef = useRef(null);
 
   const handleSend = async (text) => {
     const userText = text || input.trim();
     if (!userText) return;
 
-    // User message
-    const userMessage = { id: Date.now().toString(), text: userText, sender: 'user' };
+    const userMessage = {
+      id: Date.now().toString(),
+      text: userText,
+      sender: 'user'
+    };
     setMessages(prev => [...prev, userMessage]);
-    setInput(''); // Clear input field
+    setInput('');
+    Keyboard.dismiss();
 
     try {
-      const response = await fetch('https://malkakhattak-imam-malik-chatbot.hf.space/run/predict', {
+      const response = await fetch('http://172.0.3.153:5000/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: [userText] }), // Adjusted the body format according to Hugging Face API requirements
+        body: JSON.stringify({ query: userText }),
       });
 
       const data = await response.json();
-      // Assuming response contains answers array
+
       const botMessage = {
         id: (Date.now() + 1).toString(),
-        text: data?.data?.[0] || '⚠️ No response from the bot.',
-        sender: 'bot',
+        text: data?.text || '⚠ No response from the bot.',
+        sender: 'bot'
       };
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       const errorMessage = {
         id: (Date.now() + 2).toString(),
-        text: '⚠️ Could not fetch a response. Please try again later.',
-        sender: 'bot',
+        text: '⚠ Could not connect to the server. Please ensure the backend is running.',
+        sender: 'bot'
       };
       setMessages(prev => [...prev, errorMessage]);
     }
@@ -57,6 +75,10 @@ export default function MalikChatbot() {
     </View>
   );
 
+  useEffect(() => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -64,19 +86,23 @@ export default function MalikChatbot() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <FlatList
+          ref={flatListRef}
           data={messages}
           renderItem={renderItem}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.chatContainer}
+          showsVerticalScrollIndicator={false}
         />
-        
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
             value={input}
             onChangeText={setInput}
-            placeholder="Type your question..."
-            placeholderTextColor="#888"
+            placeholder="Ask about Muwatta, Ramadan, Fiqh..."
+            placeholderTextColor="#aaa"
+            onSubmitEditing={() => handleSend(input)}
+            returnKeyType="send"
           />
           <TouchableOpacity onPress={() => handleSend(input)} style={styles.sendButton}>
             <Text style={styles.sendText}>Send</Text>
@@ -88,10 +114,10 @@ export default function MalikChatbot() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, backgroundColor: '#F0F4F8' },
   inner: { flex: 1 },
-  chatContainer: { padding: 16 },
-  messageContainer: { flexDirection: 'row', marginVertical: 4 },
+  chatContainer: { padding: 16, paddingBottom: 10 },
+  messageContainer: { flexDirection: 'row', marginVertical: 6 },
   userContainer: { justifyContent: 'flex-end' },
   botContainer: { justifyContent: 'flex-start' },
   messageBubble: {
@@ -105,7 +131,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   userBubble: {
-    backgroundColor: '#0D9488',
+    backgroundColor: '#2563EB',
     alignSelf: 'flex-end',
     borderBottomRightRadius: 4,
   },
@@ -117,6 +143,7 @@ const styles = StyleSheet.create({
   messageText: {
     fontSize: 15,
     color: '#111',
+    lineHeight: 22,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -128,19 +155,23 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 40,
+    height: 42,
     borderRadius: 20,
     paddingHorizontal: 15,
-    backgroundColor: '#f1f1f1',
+    backgroundColor: '#f0f0f0',
     color: '#000',
   },
   sendButton: {
     marginLeft: 10,
-    backgroundColor: '#0D9488',
+    backgroundColor: '#2563EB',
     borderRadius: 20,
     paddingHorizontal: 20,
     justifyContent: 'center',
-    height: 40,
+    height: 42,
   },
-  sendText: { color: '#fff', fontWeight: 'bold' },
+  sendText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
+  },
 });
